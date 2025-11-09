@@ -231,7 +231,6 @@ public class EnemyManager extends Component {
                     PowerUpComponent.PowerUpType.RAPID_FIRE,
                     PowerUpComponent.PowerUpType.TRIPLE_SHOT,
                     PowerUpComponent.PowerUpType.SCORE_BOOST,
-                    PowerUpComponent.PowerUpType.BULLET_SHIELD
             };
 
             PowerUpComponent.PowerUpType selectedType =
