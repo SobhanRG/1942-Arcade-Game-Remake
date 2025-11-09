@@ -236,7 +236,7 @@ public class EnemyManager extends Component {
             PowerUpComponent.PowerUpType selectedType =
                     commonTypes[FXGL.random(0, commonTypes.length - 1)];
 
-            FXGL.spawn("powerUp", x, y);
+            FXGL.spawn("powerUp", new SpawnData(x, y).put("type", selectedType));
 
         } catch (Exception e) {
             System.out.println("Error spawning death power-up: " + e.getMessage());
