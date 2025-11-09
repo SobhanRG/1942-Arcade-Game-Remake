@@ -154,26 +154,21 @@ public class GameManager {
         // ایجاد متن Game Over
         Text gameOverText = FXGL.getUIFactoryService().newText("GAME OVER", Color.RED, 48);
         gameOverText.setTranslateX(FXGL.getAppWidth() / 2 - 150);
-        gameOverText.setTranslateY(FXGL.getAppHeight() / 2 - 50);
+        gameOverText.setTranslateY(FXGL.getAppHeight() / 2 - 100);
 
         // ایجاد متن امتیاز نهایی
         Text finalScoreText = FXGL.getUIFactoryService().newText("Final Score: " + score, Color.BURLYWOOD, 24);
         finalScoreText.setTranslateX(FXGL.getAppWidth() / 2 - 100);
-        finalScoreText.setTranslateY(FXGL.getAppHeight() / 2 + 20);
+        finalScoreText.setTranslateY(FXGL.getAppHeight() / 2 - 30);
 
-        // ایجاد دکمه شروع مجدد
-        Button restartButton = new Button("Play Again");
-        restartButton.setStyle("-fx-font-size: 18; -fx-background-color: #4CAF50; -fx-text-fill: white;");
-        restartButton.setPrefWidth(150);
-        restartButton.setPrefHeight(40);
-        restartButton.setTranslateX(FXGL.getAppWidth() / 2 - 75);
-        restartButton.setTranslateY(FXGL.getAppHeight() / 2 + 80);
-        restartButton.setOnAction(e -> restartGame());
+        // ایجاد دکمه بازگشت به منو
+        Button menuButton = createMenuButton("Main Menu", FXGL.getAppHeight() / 2 + 90);
+        menuButton.setOnAction(e -> returnToMainMenu());
 
         // اضافه کردن المان‌های UI پایان بازی
         FXGL.addUINode(gameOverText);
         FXGL.addUINode(finalScoreText);
-        FXGL.addUINode(restartButton);
+        FXGL.addUINode(menuButton);
 
         // پاک‌سازی موجودیت‌های بازی
         stopGameEntities();
@@ -186,29 +181,55 @@ public class GameManager {
     }
 
     /**
+     * ایجاد دکمه با استایل یکسان
+     */
+    private Button createMenuButton(String text, double yPosition) {
+        Button button = new Button(text);
+
+        button.setStyle(
+                "-fx-font-size: 18px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-background-color: #4CAF50; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-padding: 10px 20px; " +
+                        "-fx-background-radius: 8px; " +
+                        "-fx-border-color: #45a049; " +
+                        "-fx-border-width: 2px; " +
+                        "-fx-border-radius: 8px;"
+        );
+
+        button.setTranslateX(FXGL.getAppWidth() / 2 - 75);
+        button.setTranslateY(yPosition);
+
+        return button;
+    }
+
+    /**
      * شروع مجدد بازی
      */
-    private void restartGame() {
+
+    /**
+     * بازگشت به منوی اصلی
+     */
+    private void returnToMainMenu() {
         try {
-            // بازنشانی وضعیت بازی
+            // پاک‌سازی کامل
+            FXGL.getGameScene().clearUINodes();
+            FXGL.getGameWorld().getEntities().forEach(Entity::removeFromWorld);
+
+            // بازنشانی وضعیت
             score = 0;
             playerLives = 3;
             currentStage = 1;
             isGameOver = false;
 
-            // پاک‌سازی صحنه
-            FXGL.getGameScene().clearUINodes();
-            FXGL.getGameWorld().getEntities().forEach(Entity::removeFromWorld);
+            // بازگشت به منوی اصلی
+            Main main = (Main) FXGL.getApp();
+            main.returnToMainMenu();
 
-            // راه‌اندازی مجدد
-            initialize();
-            FXGL.spawn("player", 400, 500);
-            FXGL.entityBuilder().with(new UnifiedSpawner()).buildAndAttach();
-            FXGL.getGameController().resumeEngine();
-
-            System.out.println("Game restarted!");
+            System.out.println("Returned to main menu");
         } catch (Exception e) {
-            System.out.println("Error restarting game: " + e.getMessage());
+            System.out.println("Error returning to main menu: " + e.getMessage());
         }
     }
 

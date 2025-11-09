@@ -1,7 +1,9 @@
 package com.demo.game1942;
 
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.component.Component;
+import javafx.util.Duration;
 
 /**
  * سیستم مدیریت دشمنان - جایگزین تمام کامپوننت‌های دشمن قبلی
@@ -142,7 +144,7 @@ public class EnemyManager extends Component {
                 shootTripleBullet();
                 break;
             case BOSS:
-                shootCirclePattern(8);
+                shootBossPattern(3);
                 break;
         }
     }
@@ -172,10 +174,9 @@ public class EnemyManager extends Component {
     /**
      * شلیک الگوی دایره‌ای (برای باس)
      */
-    private void shootCirclePattern(int bulletCount) {
+    private void shootBossPattern(int bulletCount) {
         for (int i = 0; i < bulletCount; i++) {
-            double angle = (2 * Math.PI / bulletCount) * i;
-            final int index = i;
+            int index = i;
 
             // تأخیر برای ایجاد الگوی زیبا
             FXGL.getGameTimer().runOnceAfter(() -> {
