@@ -9,7 +9,7 @@ public class EnemyComponent extends Component {
     private double shootCooldown = 2.0;
     private double timeToShoot = 2.0;
 
-    public EnemyComponent(EnemyManager.EnemyType enemyType) {
+    public EnemyComponent(com.demo.game1942.EnemyManager enemyType) {
     }
 
     public void onUpdate (double tpf) {

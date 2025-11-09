@@ -1,263 +1,203 @@
 package com.demo.game1942;
 
-
 import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.UserAction;
-
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+/**
+ * کامپوننت کنترل بازیکن
+ * مسئولیت مدیریت حرکت، شلیک و قدرت‌های بازیکن
+ */
 public class PlayerComponent extends Component {
 
+    // تنظیمات پایه بازیکن
     private double speed = 300;
     private boolean canShoot = true;
-    private double shootCoolDown = 0.2;
+    private double shootCooldown = 0.2;
     private boolean active = true;
-    private static boolean inputRegistered = false;
+    private boolean inputRegistered = false;
 
-    private boolean bulletShieldActive = false;
+    // قدرت‌های فعال
     private boolean rapidFireActive = false;
     private boolean tripleShotActive = false;
     private boolean shieldActive = false;
+    private boolean bulletShieldActive = false;
     private double powerUpTimer = 0;
 
     @Override
     public void onAdded() {
+        // راه‌اندازی کنترل‌ها فقط یک بار
         if (!inputRegistered) {
             setupInput();
             inputRegistered = true;
         }
-        active = true;
     }
 
-    @Override
-    public void onRemoved() {
-        active = false;
-    }
-
+    /**
+     * تنظیم کنترل‌های صفحه کلید
+     */
     private void setupInput() {
         Input input = FXGL.getInput();
 
-            input.addAction(new UserAction("Move Left") {
-                @Override
-                protected void onAction() {
-                    if (active && entity != null) {
-                        entity.translateX(-speed * 0.016);
-                    }
+        // حرکت به چپ (کلید A)
+        input.addAction(new UserAction("Move Left") {
+            @Override
+            protected void onAction() {
+                if (active && entity != null) {
+                    entity.translateX(-speed * 0.016);
+                }
             }
-    }, KeyCode.A);
+        }, KeyCode.A);
 
-            input.addAction(new UserAction("Move Right") {
-                @Override
-                protected void onAction() {
-                    if (active && entity != null) {
-                        entity.translateX(speed * 0.016);
-                    }
-                    
-                 }
-    }, KeyCode.D);
-
-            input.addAction(new UserAction("Move Down") {
-                @Override
-                protected void onAction() {
-                    if (active && entity != null) {
-                        entity.translateY(speed * 0.016);
-                    }
+        // حرکت به راست (کلید D)
+        input.addAction(new UserAction("Move Right") {
+            @Override
+            protected void onAction() {
+                if (active && entity != null) {
+                    entity.translateX(speed * 0.016);
                 }
-    }, KeyCode.S);
+            }
+        }, KeyCode.D);
 
-            input.addAction(new UserAction("Move Up") {
-                @Override
-                protected void onAction() {
-                    if (active && entity != null) {
-                        entity.translateY(-speed * 0.016);
-                    }
+        // حرکت به پایین (کلید S)
+        input.addAction(new UserAction("Move Down") {
+            @Override
+            protected void onAction() {
+                if (active && entity != null) {
+                    entity.translateY(speed * 0.016);
                 }
-    }, KeyCode.W);
+            }
+        }, KeyCode.S);
 
-                input.addAction(new UserAction("Shoot") {
-                    @Override
-                    protected void onAction() {
-                        if (canShoot && active) {
-                            shoot();
-                        }
-                    }
-                }, KeyCode.SPACE);
+        // حرکت به بالا (کلید W)
+        input.addAction(new UserAction("Move Up") {
+            @Override
+            protected void onAction() {
+                if (active && entity != null) {
+                    entity.translateY(-speed * 0.016);
+                }
+            }
+        }, KeyCode.W);
 
-                input.addAction(new UserAction("Pause Menu") {
-                    @Override
-                    protected void onAction() {
-                        if (active) {
-                            showPauseMenu();
-                        }
-                    }
-                }, KeyCode.F1);
-
-
-}
-
-    private static void resetInputRegistration() {
-        inputRegistered = false;
+        // شلیک (کلید Space)
+        input.addAction(new UserAction("Shoot") {
+            @Override
+            protected void onAction() {
+                if (canShoot && active) {
+                    shoot();
+                }
+            }
+        }, KeyCode.SPACE);
     }
 
-    private void showPauseMenu() {
-        if (!active) return;
-        System.out.println("pause menu activated!");
+    /**
+     * شلیک گلوله توسط بازیکن
+     */
+    private void shoot() {
+        if (!active || !canShoot) return;
 
-        Rectangle overlay = new Rectangle(FXGL.getAppWidth(), FXGL.getAppHeight(), Color.rgb(0, 0, 0, 0.7));
+        canShoot = false;
 
-        Text pauseText = FXGL.getUIFactoryService().newText("Game paused", Color.WHITE, 36);
-
-        pauseText.setTranslateX((float)FXGL.getAppWidth() / 2 - 100);
-        pauseText.setTranslateX((float)FXGL.getAppWidth() / 2 - 100);
-
-        Button menuButton = createPauseButton("main menu", 40);
-        menuButton.setOnAction(e -> returnToMainMenu());
-
-        Button resumeButton = createPauseButton("resume", -30);
-        resumeButton.setOnAction(e -> hidePauseMenu(menuButton, overlay, pauseText, resumeButton));
-
-        FXGL.addUINode(overlay);
-        FXGL.addUINode(pauseText);
-        FXGL.addUINode(resumeButton);
-        FXGL.addUINode(menuButton);
-
-        FXGL.getGameController().pauseEngine();
-
-    }
-
-    private Button createPauseButton(String text, double yOffset) {
-        Button button = new Button(text);
-        button.setStyle(
-                        "-fx-font-size: 20px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-background-color: #2196F3; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-padding: 10px 20px; " +
-                        "-fx-background-radius: 8px; " +
-                        "-fx-border-color: #1976D2; " +
-                        "-fx-border-width: 2px; " +
-                        "-fx-border-radius: 8px;"
-        );
-
-        button.setTranslateY((float)FXGL.getAppHeight() / 2 + yOffset);
-        button.setTranslateX((float)FXGL.getAppWidth() / 2 - 80);
-
-        return button;
-    }
-
-    private void hidePauseMenu(Node... nodes) {
-        for (Node node : nodes) {
-            FXGL.removeUINode(node);
+        if (tripleShotActive) {
+            // شلیک سه‌تایی
+            for (int i = -1; i <= 1; i++) {
+                FXGL.spawn("playerBullet",
+                        entity.getX() + entity.getWidth() / 2 - 5 + (i * 15),
+                        entity.getY() - 20
+                );
+            }
+        } else {
+            // شلیک معمولی
+            FXGL.spawn("playerBullet",
+                    entity.getX() + entity.getWidth() / 2 - 5,
+                    entity.getY() - 20
+            );
         }
 
-        FXGL.getGameController().resumeEngine();
+        // تنظیم کول‌داون بر اساس قدرت فعال
+        double currentCooldown = rapidFireActive ? shootCooldown * 0.5 : shootCooldown;
+
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            canShoot = true;
+        }, Duration.seconds(currentCooldown));
     }
 
-    private void returnToMainMenu() {
-        try {
-
-            active = false;
-            Main main = (Main) FXGL.getApp();
-            main.returnToMainMenu();
-
-        } catch (Exception e) {
-            System.out.println("Error returning to main menu from PlayerComponent: " + e.getMessage());
-            e.printStackTrace();
-        }
+    /**
+     * فعال‌سازی شلیک سریع
+     */
+    public void activeRapidFire(double duration) {
+        rapidFireActive = true;
+        startPowerUpTimer(duration);
+        System.out.println("Rapid Fire Activated for " + duration + " seconds!");
     }
-                private void shoot() {
-                    if (!active || !canShoot) return;
 
-                    canShoot = false;
+    /**
+     * فعال‌سازی شلیک سه‌تایی
+     */
+    public void activeTripleShot(double duration) {
+        tripleShotActive = true;
+        startPowerUpTimer(duration);
+        System.out.println("Triple Shot Activated for " + duration + " seconds!");
+    }
 
-                    if (tripleShotActive) {
-                        for (int i = -1; i <= 1; i++) {
-                            FXGL.spawn("playerBullet",
-                                    entity.getX() + entity.getWidth() / 2 - 5 + (i * 15),
-                                    entity.getY() - 20
-                            );
-                        }
-                    } else {
-                        FXGL.spawn("playerBullet",
-                                entity.getX() + entity.getWidth() / 2 - 5,
-                                entity.getY() - 20
-                        );
-                    }
-                    double currentCooldown = rapidFireActive ? shootCoolDown * 0.5 : shootCoolDown;
+    /**
+     * فعال‌سازی محافظ
+     */
+    public void activateShield(double duration) {
+        shieldActive = true;
+        startPowerUpTimer(duration);
+        System.out.println("Shield Activated for " + duration + " seconds!");
+    }
 
-                    FXGL.getGameTimer().runOnceAfter(() -> {
-                        canShoot = true;
-                    }, Duration.seconds(currentCooldown));
+    /**
+     * فعال‌سازی محافظ گلوله
+     */
+    public void activateBulletShield(double duration) {
+        bulletShieldActive = true;
+        startPowerUpTimer(duration);
+        System.out.println("Bullet Shield Activated for " + duration + " seconds!");
+    }
 
-                }
-                public void activeRapidFire (double duration) {
-                    rapidFireActive = true;
-                    startPowerUpTimer(duration);
-                    System.out.println("Rapid Fire Activated for " + duration + " seconds!");
-                }
-                public void activeTripleShot (double duration) {
-                    tripleShotActive = true;
-                    startPowerUpTimer(duration);
-                    System.out.println("Triple Shot Activated for " + duration + " seconds!");
-                }
-
-                public void activateShield (double duration) {
-                    shieldActive = true;
-                    startPowerUpTimer(duration);
-                    System.out.println("Shield Activated for " + duration + " seconds!");
-                }
-
-                public void activateBulletShield (double duration) {
-                    bulletShieldActive = true;
-                    startPowerUpTimer(duration);
-                    System.out.println("Bullet Shield Activated for " + duration + " seconds!");
-
-                }
-
-
-                private void startPowerUpTimer (double duration) {
-                    powerUpTimer = Math.max(powerUpTimer, duration);
-                }
-
+    /**
+     * شروع تایمر قدرت
+     */
+    private void startPowerUpTimer(double duration) {
+        powerUpTimer = Math.max(powerUpTimer, duration);
+    }
 
     @Override
     public void onUpdate(double tpf) {
         if (!active || entity == null) return;
 
+        // نگه داشتن بازیکن در محدوده صفحه
         keepInBounds();
 
+        // مدیریت تایمر قدرت‌ها
         if (powerUpTimer > 0) {
             powerUpTimer -= tpf;
-
-            if (powerUpTimer <=0) {
+            if (powerUpTimer <= 0) {
                 deactivateAllPowerUps();
-                
             }
         }
     }
 
+    /**
+     * غیرفعال کردن تمام قدرت‌ها
+     */
     private void deactivateAllPowerUps() {
         rapidFireActive = false;
         tripleShotActive = false;
-        shieldActive = false;    
+        shieldActive = false;
         bulletShieldActive = false;
-
         System.out.println("All power-ups deactivated!");
     }
 
-    public boolean hasShield() {
-        return !shieldActive;
-    }
-    
+    /**
+     * نگه داشتن بازیکن در محدوده صفحه
+     */
     private void keepInBounds() {
         if (entity.getX() < 0) entity.setX(0);
         if (entity.getX() > FXGL.getAppWidth() - entity.getWidth())
@@ -265,29 +205,14 @@ public class PlayerComponent extends Component {
         if (entity.getY() < 0) entity.setY(0);
         if (entity.getY() > FXGL.getAppHeight() - entity.getHeight())
             entity.setY(FXGL.getAppHeight() - entity.getHeight());
-        
     }
+
+    // Getter methods برای وضعیت قدرت‌ها
+    public boolean hasShield() { return shieldActive; }
+    public boolean hasBulletShield() { return bulletShieldActive; }
+    public boolean isActive() { return active; }
 
     public void setActive(boolean active) {
         this.active = active;
     }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public boolean hasBulletShield() {
-        return bulletShieldActive;
-    }
-
-
-
-    }
-
-
-
-    
-
-
-
-
+}

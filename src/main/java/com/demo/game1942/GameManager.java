@@ -2,6 +2,7 @@ package com.demo.game1942;
 
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.demo.game1942.UnifiedSpawner;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.scene.control.Button;
@@ -9,326 +10,282 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-
+/**
+ * سیستم مدیریت وضعیت بازی - Singleton Pattern
+ * مسئولیت مدیریت امتیاز، جان‌ها، مرحله و وضعیت بازی
+ */
 public class GameManager {
 
     private static GameManager instance;
 
+    // متغیرهای وضعیت بازی
     private int score = 0;
     private int playerLives = 3;
     private int currentStage = 1;
     private boolean isGameOver = false;
-
     private int bulletDestroyed = 0;
     private int enemiesDestroyed = 0;
     private int powerUpsCollected = 0;
 
+    // المان‌های UI
     private Text scoreText;
     private Text livesText;
     private Text stageText;
 
+    // Constructor خصوصی برای الگوی Singleton
     private GameManager() {}
-        public static GameManager getInstance() {
-            if (instance == null) {
-                instance = new GameManager();
 
-            }
-            return instance;
+    /**
+     * دریافت نمونه یکتای GameManager
+     */
+    public static GameManager getInstance() {
+        if (instance == null) {
+            instance = new GameManager();
         }
+        return instance;
+    }
 
-        public void initialize() {
-            if (scoreText == null) {
-                createUI();
-            }
-        }
-        
+    /**
+     * راه‌اندازی اولیه سیستم مدیریت بازی
+     */
+    public void initialize() {
+        createUI();
+        System.out.println("GameManager initialized!");
+    }
 
-        public void resetGame() {
+    /**
+     * ایجاد رابط کاربری بازی
+     */
+    private void createUI() {
+        // ایجاد متن امتیاز
+        scoreText = FXGL.getUIFactoryService().newText("Score: 0", Color.BISQUE, 16);
+        scoreText.setTranslateX(10);
+        scoreText.setTranslateY(30);
+
+        // ایجاد متن جان‌ها
+        livesText = FXGL.getUIFactoryService().newText("Lives: 3", Color.BISQUE, 16);
+        livesText.setTranslateX(10);
+        livesText.setTranslateY(50);
+
+        // ایجاد متن مرحله
+        stageText = FXGL.getUIFactoryService().newText("Stage: 1", Color.BISQUE, 16);
+        stageText.setTranslateX(10);
+        stageText.setTranslateY(70);
+
+        // اضافه کردن المان‌ها به صحنه
+        FXGL.addUINode(scoreText);
+        FXGL.addUINode(livesText);
+        FXGL.addUINode(stageText);
+
+        System.out.println("UI created successfully!");
+    }
+
+    /**
+     * افزایش امتیاز بازیکن
+     */
+    public void addScore(int points) {
+        score += points;
+        updateUI();
+        checkStageProgress();
+    }
+
+    /**
+     * اعمال آسیب به بازیکن
+     */
+    public void takeDamage(int damage) {
         try {
-            score = 0;
-            playerLives = 3;
-            currentStage = 1;
-            isGameOver = false;
-
-            if (scoreText == null) {
-                createUI();
-            }
-            updateUI();
-
-            System.out.println("Game reset successfully");
-        } catch (Exception e) {
-            System.out.println("Error resetting game: " + e.getMessage());
-            e.printStackTrace();
-        }
-    
-        }
-
-        public void resetToMenu() {
-            try {
-                score = 0;
-                playerLives = 3;
-                currentStage = 1;
-                isGameOver = false;
-
-                    scoreText = null;
-                    livesText = null;
-                    stageText = null;
-
-                System.out.println("reset to menu completed");
-            } catch (Exception e) {
-                System.out.println("Error reseting to menu: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        private void createUI() {
-            scoreText = FXGL.getUIFactoryService().newText("Score: 0", Color.BLACK, 16);
-            scoreText.setTranslateX(10);
-            scoreText.setTranslateY(30);
-
-            livesText = FXGL.getUIFactoryService().newText("Lives: 3", Color.BLACK, 16);
-            livesText.setTranslateX(10);
-            livesText.setTranslateY(50);
-
-            stageText = FXGL.getUIFactoryService().newText("Stage: 1", Color.BLACK, 16);
-            stageText.setTranslateX(10);
-            stageText.setTranslateY(70);
-
-            FXGL.addUINode(scoreText);
-            FXGL.addUINode(livesText);
-            FXGL.addUINode(stageText);
-
-            System.out.println("UI created successfully!");
-
-        }
-
-        public void addScore(int points) {
-            if (scoreText != null) {
-                score += points;
-                updateUI();
-                checkStageProgress();
-            }
-
-        }
-
-        public void takeDamage (int damage) {
-            try {
-                if (isGameOver || scoreText == null) return;
+            if (isGameOver) return;
 
             playerLives -= damage;
             System.out.println("Damage taken! Lives left: " + playerLives);
-            
+
             if (playerLives <= 0) {
                 playerLives = 0;
                 gameOver();
             }
             updateUI();
-
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Error in takeDamage: " + e.getMessage());
         }
+    }
 
-        }
+    /**
+     * افزودن جان اضافی به بازیکن
+     */
+    public void addLife() {
+        playerLives = Math.min(playerLives + 1, 5);
+        updateUI();
+        showFloatingText("Extra Life!", Color.GREEN);
+    }
 
-        public void addLife() {
-            playerLives = Math.min(playerLives + 1, 5);
+    /**
+     * به‌روزرسانی رابط کاربری
+     */
+    public void updateUI() {
+        scoreText.setText("Score: " + score);
+        livesText.setText("Lives: " + playerLives);
+        stageText.setText("Stage: " + currentStage);
+    }
+
+    /**
+     * بررسی پیشرفت مرحله بر اساس امتیاز
+     */
+    private void checkStageProgress() {
+        int scoreForNextStage = currentStage * 1000;
+        if (score >= scoreForNextStage) {
+            currentStage++;
+            showFloatingText("Stage " + currentStage + "!", Color.GOLD);
             updateUI();
-            showFloatingText("Extra Life!", Color.GREEN);
         }
+    }
 
-        public void updateUI() {
-            if (scoreText != null && livesText != null && stageText != null) {
-                scoreText.setText("Score: " + score);
-                livesText.setText("Lives: " + playerLives);
-                stageText.setText("Stage: " + currentStage);
-            }
-        } 
+    /**
+     * مدیریت پایان بازی
+     */
+    public void gameOver() {
+        if (isGameOver) return;
 
-        private void checkStageProgress() {
-            int enemiesToNextStage = currentStage * 1000;
-            if (score >= enemiesToNextStage) {
-                currentStage++;
-                showFloatingText("Stage " + currentStage + "!", Color.GOLD);
-                updateUI();
-            }
+        isGameOver = true;
+        System.out.println("Game Over triggered!");
+
+        // پاک‌سازی UI موجود
+        FXGL.getGameScene().clearUINodes();
+
+        // ایجاد متن Game Over
+        Text gameOverText = FXGL.getUIFactoryService().newText("GAME OVER", Color.RED, 48);
+        gameOverText.setTranslateX(FXGL.getAppWidth() / 2 - 150);
+        gameOverText.setTranslateY(FXGL.getAppHeight() / 2 - 50);
+
+        // ایجاد متن امتیاز نهایی
+        Text finalScoreText = FXGL.getUIFactoryService().newText("Final Score: " + score, Color.BURLYWOOD, 24);
+        finalScoreText.setTranslateX(FXGL.getAppWidth() / 2 - 100);
+        finalScoreText.setTranslateY(FXGL.getAppHeight() / 2 + 20);
+
+        // ایجاد دکمه شروع مجدد
+        Button restartButton = new Button("Play Again");
+        restartButton.setStyle("-fx-font-size: 18; -fx-background-color: #4CAF50; -fx-text-fill: white;");
+        restartButton.setPrefWidth(150);
+        restartButton.setPrefHeight(40);
+        restartButton.setTranslateX(FXGL.getAppWidth() / 2 - 75);
+        restartButton.setTranslateY(FXGL.getAppHeight() / 2 + 80);
+        restartButton.setOnAction(e -> restartGame());
+
+        // اضافه کردن المان‌های UI پایان بازی
+        FXGL.addUINode(gameOverText);
+        FXGL.addUINode(finalScoreText);
+        FXGL.addUINode(restartButton);
+
+        // پاک‌سازی موجودیت‌های بازی
+        stopGameEntities();
+        disablePlayerControls();
+
+        // توقف موتور بازی بعد از ۲ ثانیه
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            FXGL.getGameController().pauseEngine();
+        }, Duration.seconds(2));
+    }
+
+    /**
+     * شروع مجدد بازی
+     */
+    private void restartGame() {
+        try {
+            // بازنشانی وضعیت بازی
+            score = 0;
+            playerLives = 3;
+            currentStage = 1;
+            isGameOver = false;
+
+            // پاک‌سازی صحنه
+            FXGL.getGameScene().clearUINodes();
+            FXGL.getGameWorld().getEntities().forEach(Entity::removeFromWorld);
+
+            // راه‌اندازی مجدد
+            initialize();
+            FXGL.spawn("player", 400, 500);
+            FXGL.entityBuilder().with(new UnifiedSpawner()).buildAndAttach();
+            FXGL.getGameController().resumeEngine();
+
+            System.out.println("Game restarted!");
+        } catch (Exception e) {
+            System.out.println("Error restarting game: " + e.getMessage());
         }
+    }
 
-       public void gameOver() {
+    /**
+     * متوقف کردن تمام موجودیت‌های بازی
+     */
+    private void stopGameEntities() {
+        try {
+            FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY).forEach(Entity::removeFromWorld);
+            FXGL.getGameWorld().getEntitiesByType(EntityType.PLAYER_BULLET).forEach(Entity::removeFromWorld);
+            FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY_BULLET).forEach(Entity::removeFromWorld);
+        } catch (Exception e) {
+            System.out.println("Error stopping entities: " + e.getMessage());
+        }
+    }
 
-                if (isGameOver) return;
-
-                isGameOver = true;
-                System.out.println("Game Over triggered!");
-
-
-                Text gameOverText = FXGL.getUIFactoryService().newText("GAME OVER", Color.RED, 48);
-                gameOverText.setTranslateX((double) FXGL.getAppWidth() / 2 - 150);
-                gameOverText.setTranslateY((double)FXGL.getAppHeight() / 2 - 100);
-
-                Text finalScoreText = FXGL.getUIFactoryService().newText("Final Score: " + score, Color.BURLYWOOD, 24);
-                finalScoreText.setTranslateX((double)FXGL.getAppHeight() / 2 - 100);
-                finalScoreText.setTranslateY((double)FXGL.getAppWidth() / 2 - 30);
-
-                Button restartButton = createMenuButton("Play Again", (float)FXGL.getAppHeight() / 2 + 20);
-                restartButton.setOnAction(event -> restartGame());
-
-                Button menuButton = createMenuButton("Main Menu", (float)FXGL.getAppHeight() / 2 + 90);
-                menuButton.setOnAction(event -> returnToMainMenu());
-
-
-                FXGL.addUINode(gameOverText);
-                FXGL.addUINode(finalScoreText);
-                FXGL.addUINode(restartButton);
-                FXGL.addUINode(menuButton);
-
-                stopGameEntities();
-                disablePlayerControls();
-
-                FXGL.getGameTimer().runOnceAfter(() -> {
-                    FXGL.getGameController().pauseEngine();
-                }, Duration.seconds(1));
-            }
-
-            private Button createMenuButton(String text, double yPosition) {
-                Button button = new Button(text);
-
-                button.setStyle("-fx-font-size: 18px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-background-color: #4CAF50; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-padding: 10px 20px; " +
-                        "-fx-background-radius: 8px; " +
-                        "-fx-border-color: #45a049; " +
-                        "-fx-border-width: 2px; " +
-                        "-fx-border-radius: 8px;");
-
-                button.setTranslateX((float)FXGL.getAppWidth() / 2 - 75);
-                button.setTranslateY(yPosition);
-
-                return button;
-            }
-
-            private void stopGameEntities() {
-                try {
-
-                    FXGL.getGameWorld().getEntities().clear();
-
-                } catch (Exception e) {
-
-                    System.out.println("Error stop entites: " + e.getMessage());
+    /**
+     * غیرفعال کردن کنترل‌های بازیکن
+     */
+    private void disablePlayerControls() {
+        try {
+            Entity player = FXGL.getGameWorld().getEntitiesByType(EntityType.PLAYER).get(0);
+            if (player != null) {
+                PlayerComponent playerComp = player.getComponent(PlayerComponent.class);
+                if (playerComp != null) {
+                    playerComp.setActive(false);
                 }
             }
+        } catch (Exception e) {
+            System.out.println("Error disabling player controls: " + e.getMessage());
+        }
+    }
 
-            private void disablePlayerControls() {
-                try {
-                    Entity player = FXGL.getGameWorld().getSingleton(EntityType.PLAYER);
+    /**
+     * نمایش متن شناور برای رویدادها
+     */
+    public void showFloatingText(String text, Color color) {
+        Text floatingText = FXGL.getUIFactoryService().newText(text, color, 16);
+        floatingText.setTranslateX(FXGL.getAppWidth() / 2 - 50);
+        floatingText.setTranslateY(FXGL.getAppHeight() / 2);
 
-                    if (player != null) {
-                        PlayerComponent playerComp = player.getComponent(PlayerComponent.class);
+        FXGL.addUINode(floatingText);
 
-                        if (playerComp != null) {
-                            playerComp.setActive(false);
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error disabling player controls" + e.getMessage());
-                }
-            }
+        // انیمیشن حرکت به بالا
+        TranslateTransition move = new TranslateTransition(Duration.seconds(1.5), floatingText);
+        move.setToY(floatingText.getTranslateY() - 100);
 
+        // انیمیشن محو شدن
+        FadeTransition fade = new FadeTransition(Duration.seconds(1.5), floatingText);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+        fade.setOnFinished(e -> FXGL.removeUINode(floatingText));
 
-            public int getCurrentStage() {
-                return currentStage;
-            }
-            public int getPlayerLives() {
-                return playerLives;
-            }
-            public boolean isGameOver() {
-                return isGameOver;
-            }
+        move.play();
+        fade.play();
+    }
 
-            public void addBulletDestructionScore() {
-                bulletDestroyed++;
-                addScore(25);
-                showFloatingText("Bullet Block +25", Color.GOLDENROD);
-                updateStatusUI();
+    /**
+     * فعال کردن امتیاز دوبرابر
+     */
+    public void activateDoubleScore(double duration) {
+        addScore(500);
+        showFloatingText("Double Score!", Color.YELLOW);
+    }
 
-            }
+    /**
+     * افزایش امتیاز نابودی گلوله
+     */
+    public void addBulletDestructionScore() {
+        bulletDestroyed++;
+        addScore(25);
+        showFloatingText("Bullet Block +25", Color.ORANGE);
+    }
 
-            public void showFloatingText(String text, Color color) {
-                Text floatingText = FXGL.getUIFactoryService().newText(text, color, 16);
-                floatingText.setTranslateX((double)FXGL.getAppWidth() / 2 - 50);
-                floatingText.setTranslateY((double)FXGL.getAppHeight() / 2);
-
-                FXGL.addUINode(floatingText);
-
-                TranslateTransition move = new TranslateTransition(Duration.seconds(1.5), floatingText);
-                move.setToY(floatingText.getTranslateY() - 100);
-
-                FadeTransition fade = new FadeTransition(Duration.seconds(1.5), floatingText);
-                fade.setFromValue(1.0);
-                fade.setToValue(0.0);
-                fade.setOnFinished(e -> FXGL.removeUINode(floatingText));
-
-                move.play();
-                fade.play();
-
-            }
-
-            private void updateStatusUI() {
-                System.out.println("Bullets Destroyed: " + bulletDestroyed);
-
-            }
-
-            public void activateDoubleScore(double duration) {
-
-                addScore(500);
-                showFloatingText("Double Score!", Color.CORAL);
-            }
-
-            private void restartGame() {
-                try {
-                    FXGL.getGameScene().clearUINodes();
-
-                    Main main = (Main) FXGL.getApp();
-
-
-                    System.out.println("Game restarted!");
-                } catch (Exception e) {
-                    System.out.println("Error restarting game: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-
-                public void returnToMainMenu() {
-                    try {
-                        Main main = (Main) FXGL.getApp();
-                        main.returnToMainMenu();
-
-                        System.out.println("returned to main menu");
-                    } catch (Exception e) {
-                        System.out.println("Error returning to main menu");
-                        e.printStackTrace();
-                    }
-                }
-
-
-
-
-
+    // Getter methods
+    public int getCurrentStage() { return currentStage; }
+    public int getPlayerLives() { return playerLives; }
+    public boolean isGameOver() { return isGameOver; }
+    public int getScore() { return score; }
 }
-
-
-
-            
-            
-
-
-
-
-
-
-            
-
-    
-
-    

@@ -3,78 +3,146 @@ package com.demo.game1942;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
+import javafx.scene.paint.Color;
 
+/**
+ * کامپوننت آیتم‌های تقویتی
+ * مسئولیت حرکت، اعمال اثر و مدیریت مدت زمان قدرت‌ها
+ */
 public class PowerUpComponent extends Component {
-    
+
+    /**
+     * انواع آیتم‌های تقویتی موجود در بازی
+     */
     public enum PowerUpType {
-        RAPID_FIRE(10.0),
-        TRIPLE_SHOT(15.0),
-        SHIELD(12.0),
-        EXTRA_LIFE(2.0),
-        SCORE_BOOST(2.0),
-        BULLET_SHIELD(8.0);
+        RAPID_FIRE(10.0, "Rapid Fire"),      // شلیک سریع
+        TRIPLE_SHOT(15.0, "Triple Shot"),    // شلیک سه‌تایی
+        SHIELD(12.0, "Shield"),              // محافظ
+        EXTRA_LIFE(0.0, "Extra Life"),       // جان اضافی
+        SCORE_BOOST(0.0, "Score Boost"),     // امتیاز دوبرابر
+        BULLET_SHIELD(8.0, "Bullet Shield"); // محافظ گلوله
 
-        public final double duration;
+        public final double duration; // مدت زمان اثر
+        public final String displayName; // نام نمایشی
 
-        PowerUpType(double duration) {
+        PowerUpType(double duration, String displayName) {
             this.duration = duration;
+            this.displayName = displayName;
         }
-
     }
 
+    // متغیرهای نمونه
     private PowerUpType type;
-    private double duration;
-    private double speed = 100; //default = 50
+    private double speed = 80.0;
 
-    public PowerUpComponent (PowerUpType type) {
+    /**
+     * سازنده با نوع مشخص
+     */
+    public PowerUpComponent(PowerUpType type) {
         this.type = type;
-        //this.duration = duration;
-
     }
 
-    @Override 
+    @Override
     public void onUpdate(double tpf) {
+        if (entity == null) return;
 
+        // حرکت آرام به پایین
         entity.translateY(speed * tpf);
 
+        // حذف در صورت خروج از صفحه
         if (entity.getY() > FXGL.getAppHeight() + 50) {
             entity.removeFromWorld();
-
         }
-
     }
 
+    /**
+     * اعمال اثر قدرت بر روی بازیکن
+     */
     public void applyPowerUp(Entity player) {
-        PlayerComponent playerComponent = player.getComponent(PlayerComponent.class);
+        try {
+            PlayerComponent playerComponent = player.getComponent(PlayerComponent.class);
+            if (playerComponent == null) {
+                System.out.println("PlayerComponent not found!");
+                return;
+            }
 
+            System.out.println("Applying power-up: " + type.displayName);
+
+            // اعمال اثر بر اساس نوع قدرت
+            switch (type) {
+                case RAPID_FIRE:
+                    playerComponent.activeRapidFire(type.duration);
+                    break;
+
+                case TRIPLE_SHOT:
+                    playerComponent.activeTripleShot(type.duration);
+                    break;
+
+                case SHIELD:
+                    playerComponent.activateShield(type.duration);
+                    break;
+
+                case EXTRA_LIFE:
+                    GameManager.getInstance().addLife();
+                    break;
+
+                case SCORE_BOOST:
+                    GameManager.getInstance().activateDoubleScore(type.duration);
+                    break;
+
+                case BULLET_SHIELD:
+                    playerComponent.activateBulletShield(type.duration);
+                    break;
+            }
+
+            // نمایش پیام به بازیکن
+            showPowerUpNotification();
+
+            // حذف آیتم از دنیای بازی
+            entity.removeFromWorld();
+
+        } catch (Exception e) {
+            System.out.println("Error applying power-up: " + e.getMessage());
+        }
+    }
+
+    /**
+     * نمایش نوتیفیکیشن قدرت
+     */
+    private void showPowerUpNotification() {
+        String message = type.displayName + " Activated!";
+        if (type.duration > 0) {
+            message += " (" + (int)type.duration + "s)";
+        }
+
+        // نمایش متن شناور
+        GameManager.getInstance().showFloatingText(message, getPowerUpColor());
+
+        // نمایش نوتیفیکیشن در کنسول
+        System.out.println("POWER-UP: " + message);
+    }
+
+    /**
+     * دریافت رنگ متناسب با نوع قدرت
+     */
+    private Color getPowerUpColor() {
         switch (type) {
-            case RAPID_FIRE:
-                playerComponent.activeRapidFire(duration);    
-                FXGL.getNotificationService().pushNotification("Rapid Fire Acitvated!");
-                break;
-
-            case TRIPLE_SHOT:
-                playerComponent.activeTripleShot(duration);
-                FXGL.getNotificationService().pushNotification("Triple Shot Acitvated!");
-                break;
-
-            case SHIELD:
-                playerComponent.activateShield(duration);
-                FXGL.getNotificationService().pushNotification("Shield Acitvated!");
-                break;
-            case BULLET_SHIELD:
-                playerComponent.activateBulletShield(duration);
-                FXGL.getNotificationService().pushNotification("Bullet Shield Acitvated!");
-                break;
-            case EXTRA_LIFE:
-                GameManager.getInstance().addLife();
-                FXGL.getNotificationService().pushNotification("Extra Life!");
-                break;
-            case SCORE_BOOST:
-                GameManager.getInstance().activateDoubleScore(duration);
-                FXGL.getNotificationService().pushNotification("Score Boost");
+            case RAPID_FIRE: return Color.YELLOW;
+            case TRIPLE_SHOT: return Color.BLUE;
+            case SHIELD: return Color.CYAN;
+            case EXTRA_LIFE: return Color.GREEN;
+            case SCORE_BOOST: return Color.ORANGE;
+            case BULLET_SHIELD: return Color.GOLD;
 
         }
-        entity.removeFromWorld();
+        return null;
+    }
+
+    // Getter methods
+    public PowerUpType getType() { return type; }
+    public double getSpeed() { return speed; }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
     }
 }
