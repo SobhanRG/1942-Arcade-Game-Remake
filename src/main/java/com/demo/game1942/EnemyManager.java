@@ -179,8 +179,8 @@ public class EnemyManager extends Component {
 
             // تأخیر برای ایجاد الگوی زیبا
             FXGL.getGameTimer().runOnceAfter(() -> {
-                spawnDirectionalBullet(angle);
-            }, javafx.util.Duration.seconds(index * 0.1));
+                shootSingleBullet();
+            }, Duration.seconds(index * 0.1));
         }
     }
 
