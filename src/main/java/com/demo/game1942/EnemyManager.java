@@ -185,21 +185,6 @@ public class EnemyManager extends Component {
     }
 
     /**
-     * شلیک گلوله در جهت مشخص
-     */
-    private void spawnDirectionalBullet(double angle) {
-        double bulletSpeed = 150;
-        double dx = Math.sin(angle) * bulletSpeed;
-        double dy = Math.cos(angle) * bulletSpeed;
-
-        // ایجاد گلوله جهت‌دار (نیاز به پیاده‌سازی در فکتوری)
-        FXGL.spawn("enemyBullet",
-                entity.getX() + entity.getWidth() / 2 - 4,
-                entity.getY() + entity.getHeight()
-        );
-    }
-
-    /**
      * بررسی خروج دشمن از صفحه
      */
     private void checkBounds() {
