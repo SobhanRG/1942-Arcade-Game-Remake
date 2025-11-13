@@ -3,6 +3,8 @@ package com.demo.game1942;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.components.CollidableComponent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -14,26 +16,26 @@ import javafx.scene.paint.Stop;
  * مسئولیت راه‌اندازی اولیه بازی و تنظیمات پایه
  */
 public class Main extends GameApplication {
+    private Entity player;
 
     @Override
     protected void initSettings(GameSettings settings) {
         // تنظیمات پایه پنجره بازی
-        settings.setHeight(800);
-        settings.setWidth(600);
+        settings.setHeight(720);
+        settings.setWidth(1280);
         settings.setTitle("1942 Remake");
         settings.setVersion("(demo)");
         settings.setFullScreenAllowed(true);
     }
 
+
     @Override
     protected void initGame() {
-        // تنظیم رنگ پس‌زمینه
-        FXGL.getGameScene().setBackgroundColor(
-                new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(1, Color.LIGHTBLUE), new Stop(0, Color.ALICEBLUE)));
-
         // راه‌اندازی اولیه اجزای بازی
         FXGL.getGameWorld().addEntityFactory(new GameEntityFactory());
+
+        FXGL.spawn("background");
+
         FXGL.spawn("player", 400, 500); // اسپاون بازیکن در موقعیت اولیه
 
         // اسپاونر یکپارچه برای مدیریت دشمنان و پاورآپ‌ها

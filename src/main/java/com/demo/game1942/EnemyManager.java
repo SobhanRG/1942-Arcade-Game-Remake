@@ -3,6 +3,7 @@ package com.demo.game1942;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.component.Component;
+import javafx.util.Duration;
 
 /**
  * سیستم مدیریت دشمنان - جایگزین تمام کامپوننت‌های دشمن قبلی
@@ -14,9 +15,9 @@ public class EnemyManager extends Component {
      * انواع دشمنان موجود در بازی
      */
     public enum EnemyType {
-        BASIC(100, 50, 1, 2.0),      // دشمن پایه
-        FAST(200, 100, 2, 1.0),      // دشمن سریع
-        TANK(50, 150, 3, 1.5),       // دشمن مقاوم
+        BASIC(150, 50, 1, 0.8),      // دشمن پایه
+        FAST(900, 100, 2, 0.2),      // دشمن سریع
+        TANK(90, 150, 3, 1.3),       // دشمن مقاوم
         BOSS(80, 500, 10, 0.8);      // دشمن اصلی (باس)
 
         // مشخصات هر نوع دشمن
@@ -143,7 +144,8 @@ public class EnemyManager extends Component {
                 shootTripleBullet();
                 break;
             case BOSS:
-                shootCirclePattern(3);
+                shootCirclePattern(8);
+
                 break;
         }
     }
@@ -171,16 +173,14 @@ public class EnemyManager extends Component {
     }
 
     /**
-     * شلیک الگوی دایره‌ای (برای باس)
+     * الگوی شلیک برای باس
      */
     private void shootCirclePattern(int bulletCount) {
         for (int i = 0; i < bulletCount; i++) {
-            final int index = i;
+            int index = i;
 
             // تأخیر برای ایجاد الگوی زیبا
-            FXGL.getGameTimer().runOnceAfter(() -> {
-                shootSingleBullet();
-            }, javafx.util.Duration.seconds(index * 0.1));
+            FXGL.getGameTimer().runOnceAfter(this::shootSingleBullet, Duration.seconds(index * 0.1));
         }
     }
 

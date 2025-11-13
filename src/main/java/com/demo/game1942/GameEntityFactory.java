@@ -6,8 +6,10 @@ import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
 import com.almasb.fxgl.entity.components.CollidableComponent;
-import com.demo.game1942.BulletComponent;
+import com.almasb.fxgl.texture.Texture;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
@@ -25,20 +27,22 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("player")
     public Entity spawnPlayer(SpawnData data) {
-        System.out.println("Spawning player at (" + data.getX() + ", " + data.getY() + ")");
-
         // شکل بصری بازیکن
-        Rectangle view = new Rectangle(40, 40, Color.DARKBLUE);
-        view.setStroke(Color.WHITE);
-        view.setStrokeWidth(2);
+        Texture playerTexture = FXGL.texture("player.png");
+        playerTexture.setScaleY(1.1);
+        playerTexture.setScaleX(1.1);
 
-        return entityBuilder()
-                .from(data)
-                .type(EntityType.PLAYER)
-                .viewWithBBox(view)
-                .with(new CollidableComponent(true))
-                .with(new PlayerComponent())
-                .build();
+        System.out.println("Texture loaded successfully: " + playerTexture.getWidth() + "x" + playerTexture.getHeight());
+
+            return FXGL.entityBuilder()
+                    .from(data)
+                    .type(EntityType.PLAYER)
+                    .viewWithBBox(playerTexture)
+                    .with(new CollidableComponent(true))
+                    .with(new PlayerComponent())
+                    .build();
+
+
     }
 
     /**
@@ -46,14 +50,14 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("basicEnemy")
     public Entity spawnBasicEnemy(SpawnData data) {
-        Rectangle view = new Rectangle(30, 30, Color.RED);
-        view.setStroke(Color.DARKRED);
-        view.setStrokeWidth(1);
+        Texture basicEnemyTexture = FXGL.texture("basic.png");
+        basicEnemyTexture.setScaleY(1.6);
+        basicEnemyTexture.setScaleX(1.6);
 
         return entityBuilder()
                 .from(data)
                 .type(EntityType.ENEMY)
-                .viewWithBBox(view)
+                .viewWithBBox(basicEnemyTexture)
                 .with(new CollidableComponent(true))
                 .with(new EnemyManager(EnemyManager.EnemyType.BASIC))
                 .build();
@@ -64,14 +68,15 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("fastEnemy")
     public Entity spawnFastEnemy(SpawnData data) {
-        Rectangle view = new Rectangle(25, 25, Color.ORANGE);
-        view.setStroke(Color.DARKORANGE);
-        view.setStrokeWidth(1);
+        Texture fastEnemyTexture = FXGL.texture("fast.png");
+        fastEnemyTexture.setScaleX(1.4);
+        fastEnemyTexture.setScaleY(1.4);
+
 
         return entityBuilder()
                 .from(data)
                 .type(EntityType.ENEMY)
-                .viewWithBBox(view)
+                .viewWithBBox(fastEnemyTexture)
                 .with(new CollidableComponent(true))
                 .with(new EnemyManager(EnemyManager.EnemyType.FAST))
                 .build();
@@ -82,14 +87,14 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("tankEnemy")
     public Entity spawnTankEnemy(SpawnData data) {
-        Rectangle view = new Rectangle(50, 50, Color.PURPLE);
-        view.setStroke(Color.DARKVIOLET);
-        view.setStrokeWidth(2);
+        Texture tankEnemyTexture = FXGL.texture("tank.png");
+        tankEnemyTexture.setScaleY(1.2);
+        tankEnemyTexture.setScaleX(1.2);
 
         return entityBuilder()
                 .from(data)
                 .type(EntityType.ENEMY)
-                .viewWithBBox(view)
+                .viewWithBBox(tankEnemyTexture)
                 .with(new CollidableComponent(true))
                 .with(new EnemyManager(EnemyManager.EnemyType.TANK))
                 .build();
@@ -100,14 +105,14 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("bossEnemy")
     public Entity spawnBossEnemy(SpawnData data) {
-        Rectangle view = new Rectangle(80, 80, Color.DARKRED);
-        view.setStroke(Color.RED);
-        view.setStrokeWidth(3);
+        Texture bossEnemyTexture = FXGL.texture("boss.png");
+        bossEnemyTexture.setScaleY(2);
+        bossEnemyTexture.setScaleX(2);
 
         return entityBuilder()
                 .from(data)
                 .type(EntityType.ENEMY)
-                .viewWithBBox(view)
+                .viewWithBBox(bossEnemyTexture)
                 .with(new CollidableComponent(true))
                 .with(new EnemyManager(EnemyManager.EnemyType.BOSS))
                 .build();
@@ -118,14 +123,12 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("playerBullet")
     public Entity spawnPlayerBullet(SpawnData data) {
-        Rectangle view = new Rectangle(8, 20, Color.CYAN);
-        view.setStroke(Color.BLUE);
-        view.setStrokeWidth(1);
+        Texture playerBulletTexture = FXGL.texture("playerbullet.png");
 
         return entityBuilder()
                 .from(data)
                 .type(EntityType.PLAYER_BULLET)
-                .viewWithBBox(view)
+                .viewWithBBox(playerBulletTexture)
                 .with(new CollidableComponent(true))
                 .with(new BulletComponent(600, true)) // سرعت بالا، متعلق به بازیکن
                 .build();
@@ -136,14 +139,12 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("enemyBullet")
     public Entity spawnEnemyBullet(SpawnData data) {
-        Rectangle view = new Rectangle(8, 15, Color.ORANGE);
-        view.setStroke(Color.RED);
-        view.setStrokeWidth(1);
+        Texture enemyBulletTexture = FXGL.texture("enemyBullet.png");
 
         return entityBuilder()
                 .from(data)
                 .type(EntityType.ENEMY_BULLET)
-                .viewWithBBox(view)
+                .viewWithBBox(enemyBulletTexture)
                 .with(new CollidableComponent(true))
                 .with(new BulletComponent(400, false)) // سرعت متوسط، متعلق به دشمن
                 .build();
@@ -154,13 +155,13 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("explosion")
     public Entity spawnExplosion(SpawnData data) {
-        Circle explosion = new Circle(20, Color.RED);
-        explosion.setStroke(Color.ORANGE);
-        explosion.setStrokeWidth(3);
+        Texture explosionTexture = FXGL.texture("explosion.png");
+        explosionTexture.setScaleX(7);
+        explosionTexture.setScaleY(7);
 
         return entityBuilder()
                 .from(data)
-                .view(explosion)
+                .viewWithBBox(explosionTexture)
                 .with(new ExplosionComponent())
                 .build();
     }
@@ -217,14 +218,28 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("bulletExplosion")
     public Entity spawnBulletExplosion(SpawnData data) {
-        Circle explosion = new Circle(10, Color.ORANGE);
-        explosion.setStroke(Color.YELLOW);
-        explosion.setStrokeWidth(2);
+
 
         return entityBuilder()
                 .from(data)
-                .view(explosion)
+
                 .with(new BulletExplosionComponent())
+                .build();
+    }
+
+    @Spawns("background")
+    public Entity spawnBackground(SpawnData data) {
+        Image skyImage = FXGL.image("sky.png");
+
+        ImagePattern pattern = new ImagePattern(skyImage, 0, 0, 256, 256, false);
+
+        Rectangle background = new Rectangle(FXGL.getAppWidth(), FXGL.getAppHeight());
+        background.setFill(pattern);
+
+        return FXGL.entityBuilder()
+                .at(0, 0)
+                .view(background)
+                .zIndex(-1000)
                 .build();
     }
 }

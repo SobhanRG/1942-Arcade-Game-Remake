@@ -3,6 +3,7 @@ package com.demo.game1942;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.physics.CollisionHandler;
+import com.almasb.fxgl.texture.Texture;
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Point2D;
@@ -211,27 +212,27 @@ public class CollisionSystem {
     private static void spawnBulletExplosion(Point2D position) {
         try {
             // ایجاد دایره نارنجی برای انفجار گلوله
-            Circle explosion = new Circle(8, Color.ORANGE);
-            explosion.setStroke(Color.YELLOW);
-            explosion.setStrokeWidth(2);
+            Texture BulletExplosionTexture = FXGL.texture("explosion.png");
+            BulletExplosionTexture.setScaleX(3);
+            BulletExplosionTexture.setScaleY(3);
 
             // ایجاد موجودیت انفجار
             Entity explosionEntity = FXGL.entityBuilder()
                     .at(position.getX(), position.getY())
-                    .view(explosion)
+                    .view(BulletExplosionTexture)
                     .build();
 
             FXGL.getGameWorld().addEntity(explosionEntity);
 
             // انیمیشن محو شدن
-            FadeTransition fade = new FadeTransition(Duration.seconds(0.3), explosion);
+            FadeTransition fade = new FadeTransition(Duration.seconds(0.3), BulletExplosionTexture);
             fade.setFromValue(1.0);
             fade.setToValue(0.0);
             fade.setOnFinished(e -> explosionEntity.removeFromWorld());
             fade.play();
 
             // انیمیشن بزرگ شدن
-            ScaleTransition scale = new ScaleTransition(Duration.seconds(0.3), explosion);
+            ScaleTransition scale = new ScaleTransition(Duration.seconds(0.5), BulletExplosionTexture);
             scale.setFromX(0.5);
             scale.setFromY(0.5);
             scale.setToX(1.5);
