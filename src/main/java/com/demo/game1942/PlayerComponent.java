@@ -99,11 +99,14 @@ public class PlayerComponent extends Component {
     private void shoot() {
         if (!active || !canShoot) return;
 
+        MusicManager.getInstance().playSound("shoot2.wav");
+
         canShoot = false;
 
         if (tripleShotActive) {
             // شلیک سه‌تایی
             for (int i = -1; i <= 1; i++) {
+
                 FXGL.spawn("playerBullet",
                         entity.getX() + entity.getWidth() / 2 - 5 + (i * 15),
                         entity.getY() - 20
@@ -111,6 +114,7 @@ public class PlayerComponent extends Component {
             }
         } else {
             // شلیک معمولی
+            MusicManager.getInstance().playSound("shoot.wav");
             FXGL.spawn("playerBullet",
                     entity.getX() + entity.getWidth() / 2 - 5,
                     entity.getY() - 20

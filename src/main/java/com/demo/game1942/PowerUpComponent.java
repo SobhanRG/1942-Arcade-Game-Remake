@@ -67,6 +67,8 @@ public class PowerUpComponent extends Component {
 
             System.out.println("Applying power-up: " + type.displayName);
 
+            MusicManager.getInstance().playSound("powerup.wav");
+
             // اعمال اثر بر اساس نوع قدرت
             switch (type) {
                 case RAPID_FIRE:

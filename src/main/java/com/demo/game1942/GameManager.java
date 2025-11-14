@@ -1,11 +1,14 @@
 package com.demo.game1942;
 
+import com.almasb.fxgl.audio.Music;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.demo.game1942.UnifiedSpawner;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.scene.control.Button;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -26,6 +29,7 @@ public class GameManager {
     private int bulletDestroyed = 0;
     private int enemiesDestroyed = 0;
     private int powerUpsCollected = 0;
+
 
     // المان‌های UI
     private Text scoreText;

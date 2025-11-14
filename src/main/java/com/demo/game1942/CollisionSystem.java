@@ -39,22 +39,24 @@ public class CollisionSystem {
 
                     @Override
                     protected void onCollisionBegin(Entity bullet, Entity enemy) {
-                        try {
-                            // حذف گلوله و دشمن
-                            bullet.removeFromWorld();
-                            enemy.removeFromWorld();
+                            try {
+                                MusicManager.getInstance().playSound("explosion3.wav");
 
-                            // دریافت کامپوننت دشمن برای امتیاز
-                            EnemyManager enemyComponent = enemy.getComponent(EnemyManager.class);
-                            int scoreValue = (enemyComponent != null) ? enemyComponent.getScoreValue() : 100;
+                                // حذف گلوله و دشمن
+                                bullet.removeFromWorld();
+                                enemy.removeFromWorld();
 
-                            // افزودن امتیاز
-                            GameManager.getInstance().addScore(scoreValue);
+                                // دریافت کامپوننت دشمن برای امتیاز
+                                EnemyManager enemyComponent = enemy.getComponent(EnemyManager.class);
+                                int scoreValue = (enemyComponent != null) ? enemyComponent.getScoreValue() : 100;
 
-                            // ایجاد انفجار
-                            spawnExplosion(enemy.getCenter());
+                                // افزودن امتیاز
+                                GameManager.getInstance().addScore(scoreValue);
 
-                        } catch (Exception e) {
+                                // ایجاد انفجار
+                                spawnExplosion(enemy.getCenter());
+
+                            } catch (Exception e) {
                             System.out.println("Error in player bullet-enemy collision: " + e.getMessage());
                         }
                     }
@@ -72,6 +74,8 @@ public class CollisionSystem {
                     @Override
                     protected void onCollisionBegin(Entity player, Entity bullet) {
                         try {
+                            MusicManager.getInstance().playSound("explosion.wav");
+
                             // حذف گلوله
                             bullet.removeFromWorld();
 
@@ -109,7 +113,10 @@ public class CollisionSystem {
 
                     @Override
                     protected void onCollisionBegin(Entity player, Entity enemy) {
+
                         try {
+                            MusicManager.getInstance().playSound("explosion4.wav");
+
                             System.out.println("Player collided with enemy!");
 
                             // حذف دشمن
@@ -175,6 +182,8 @@ public class CollisionSystem {
                     @Override
                     protected void onCollisionBegin(Entity playerBullet, Entity enemyBullet) {
                         try {
+                            MusicManager.getInstance().playSound("explosion2.wav");
+
                             System.out.println("Player bullet hit enemy bullet!");
 
                             // حذف هر دو گلوله

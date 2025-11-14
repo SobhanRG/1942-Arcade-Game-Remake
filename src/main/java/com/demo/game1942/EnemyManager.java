@@ -144,7 +144,7 @@ public class EnemyManager extends Component {
                 shootTripleBullet();
                 break;
             case BOSS:
-                shootCirclePattern(8);
+                bossShootPattern();
 
                 break;
         }
@@ -175,13 +175,8 @@ public class EnemyManager extends Component {
     /**
      * الگوی شلیک برای باس
      */
-    private void shootCirclePattern(int bulletCount) {
-        for (int i = 0; i < bulletCount; i++) {
-            int index = i;
+    private void bossShootPattern() {
 
-            // تأخیر برای ایجاد الگوی زیبا
-            FXGL.getGameTimer().runOnceAfter(this::shootSingleBullet, Duration.seconds(index * 0.1));
-        }
     }
 
     /**
