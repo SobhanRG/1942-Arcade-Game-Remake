@@ -148,6 +148,7 @@ public class GameManager {
      */
     public void gameOver() {
         if (isGameOver) return;
+        MusicManager.getInstance().playGameOverMusic();
 
         isGameOver = true;
         System.out.println("Game Over triggered!");

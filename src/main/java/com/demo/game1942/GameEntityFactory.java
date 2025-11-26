@@ -171,46 +171,19 @@ public class GameEntityFactory implements EntityFactory {
      */
     @Spawns("powerUp")
     public Entity spawnPowerUp(SpawnData data) {
-        // ایجاد شکل الماس برای پاورآپ
-        Polygon powerUpShape = new Polygon(
-                0.0, 15.0,    // بالا
-                10.0, 0.0,    // راست-بالا
-                20.0, 15.0,   // راست-پایین
-                10.0, 30.0    // پایین
-        );
+        Texture powerUpTexture = FXGL.texture("powerUp.png");
 
         // دریافت نوع پاورآپ از داده‌های اسپاون
         PowerUpComponent.PowerUpType type = (PowerUpComponent.PowerUpType)
                 data.getData().getOrDefault("type", PowerUpComponent.PowerUpType.RAPID_FIRE);
 
-        // تنظیم رنگ بر اساس نوع پاورآپ
-        Color color = getPowerUpColor(type);
-        powerUpShape.setFill(color);
-        powerUpShape.setStroke(Color.BLACK);
-        powerUpShape.setStrokeWidth(1);
-
         return entityBuilder()
                 .from(data)
                 .type(EntityType.POWER_UP)
-                .viewWithBBox(powerUpShape)
+                .viewWithBBox(powerUpTexture)
                 .with(new CollidableComponent(true))
                 .with(new PowerUpComponent(type))
                 .build();
-    }
-
-    /**
-     * دریافت رنگ متناسب با نوع پاورآپ
-     */
-    private Color getPowerUpColor(PowerUpComponent.PowerUpType type) {
-        switch (type) {
-            case RAPID_FIRE: return Color.YELLOW;
-            case TRIPLE_SHOT: return Color.BLUE;
-            case SHIELD: return Color.CYAN;
-            case EXTRA_LIFE: return Color.GREEN;
-            case SCORE_BOOST: return Color.ORANGE;
-            case BULLET_SHIELD: return Color.GOLD;
-            default: return Color.WHITE;
-        }
     }
 
     /**

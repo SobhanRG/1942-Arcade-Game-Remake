@@ -22,13 +22,11 @@ public class MusicManager {
     }
 
     public void playBackgroundMusic() {
-//        try {
-//            stopMusic();
-//
-//            backgroundMusic = FXGL.getAssetLoader().loadMusic("background_music.wav");
-//            backgroundMusic.
-//
-//        }
+
+    }
+
+    public void playGameOverMusic() {
+        FXGL.play("gameOver.wav");
     }
 
     public void playSound(String soundFile) {
